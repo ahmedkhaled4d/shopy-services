@@ -1,8 +1,77 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/shopy-services/src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/shopy-services/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/shopy-services",
+  "projects": {
+    "shopy-services": {
+      "type": "application",
+      "root": "apps/shopy-services",
+      "entryFile": "main",
+      "sourceRoot": "apps/shopy-services/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/shopy-services/tsconfig.app.json"
+      }
+    },
+    "client-api": {
+      "type": "application",
+      "root": "apps/client-api",
+      "entryFile": "main",
+      "sourceRoot": "apps/client-api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/client-api/tsconfig.app.json"
+      }
+    },
+    "vendor-api": {
+      "type": "application",
+      "root": "apps/vendor-api",
+      "entryFile": "main",
+      "sourceRoot": "apps/vendor-api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/vendor-api/tsconfig.app.json"
+      }
+    },
+    "admin-api": {
+      "type": "application",
+      "root": "apps/admin-api",
+      "entryFile": "main",
+      "sourceRoot": "apps/admin-api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/admin-api/tsconfig.app.json"
+      }
+    },
+    "ai-api": {
+      "type": "application",
+      "root": "apps/ai-api",
+      "entryFile": "main",
+      "sourceRoot": "apps/ai-api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/ai-api/tsconfig.app.json"
+      }
+    },
+    "common": {
+      "type": "library",
+      "root": "libs/common",
+      "entryFile": "index",
+      "sourceRoot": "libs/common/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/common/tsconfig.lib.json"
+      }
+    },
+    "database": {
+      "type": "library",
+      "root": "libs/database",
+      "entryFile": "index",
+      "sourceRoot": "libs/database/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/database/tsconfig.lib.json"
+      }
+    }
   }
 }
