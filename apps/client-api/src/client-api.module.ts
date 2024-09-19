@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ClientApiController } from './client-api.controller';
 import { ClientApiService } from './client-api.service';
 import { OnboardingModule } from './onboarding/onboarding.module';
-import { AuthModule } from './auth/auth.module';
 import { WebsiteModule } from './website/website.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -20,7 +19,6 @@ import { ConfigModule } from '@nestjs/config';
       }),
     }),
     OnboardingModule,
-    AuthModule,
     WebsiteModule,
     CatalogModule,
     DatabaseModule,
