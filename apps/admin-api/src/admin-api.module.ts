@@ -12,7 +12,17 @@ import { SupportModule } from './support/support.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
-  imports: [VendorsModule, OrdersModule, CatalogModule, SettingsModule, ReviewsModule, LoggerModule, AnalyticsModule, SupportModule, DashboardModule],
+  imports: [
+    VendorsModule,
+    OrdersModule,
+    CatalogModule,
+    SettingsModule,
+    ReviewsModule,
+    LoggerModule,
+    AnalyticsModule,
+    SupportModule,
+    DashboardModule,
+  ],
   controllers: [AdminApiController],
   providers: [AdminApiService],
 })

@@ -31,9 +31,11 @@ export class AuthService {
 
     const payload = { email: user.email, sub: user._id };
     const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION || '7d',
+    });
 
-    await this.userRepository.update(user._id, { refreshToken });
+    await this.userRepository.update(user._id.toString(), { refreshToken });
 
     return { accessToken, refreshToken };
   }
@@ -51,8 +53,8 @@ export class AuthService {
       const accessToken = this.jwtService.sign(newPayload);
 
       return { accessToken };
-    } catch (error) {
-      throw new UnauthorizedException('Invalid refresh token');
+    } catch (e) {
+      throw new UnauthorizedException('Invalid refresh token', e);
     }
   }
 
@@ -80,9 +82,11 @@ export class AuthService {
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await this.userRepository.update(user._id, { password: hashedPassword });
-    } catch (error) {
-      throw new UnauthorizedException('Invalid or expired reset token');
+      await this.userRepository.update(user._id.toString(), {
+        password: hashedPassword,
+      });
+    } catch (e) {
+      throw new UnauthorizedException('Invalid or expired reset token', e);
     }
   }
 }
