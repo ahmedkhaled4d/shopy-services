@@ -1,2 +1,3 @@
 export * from './database.module';
-export * from './database.service';
+export * from './schemas/user.schema';
+export * from './repositories/user.repository';
