@@ -3,6 +3,8 @@ import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signup.dto';
 import { SignInDto } from './dto/signin.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { AuthToken } from './dto/Auth';
+import { ResetDto, VerifyDto } from './dto/recovery.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -14,7 +16,7 @@ export class AuthController {
   }
 
   @Post('signin')
-  async signIn(@Body() signInDto: SignInDto) {
+  async signIn(@Body() signInDto: SignInDto): Promise<AuthToken> {
     return this.authService.signIn(signInDto.email, signInDto.password);
   }
 
@@ -23,10 +25,15 @@ export class AuthController {
     return this.authService.refreshToken(refreshTokenDto.refreshToken);
   }
 
-  @Post('recover')
-  async recoverPassword(@Body() recoverDto: { email: string }) {
-    await this.authService.recoverPassword(recoverDto.email);
+  @Post('recovery/reset')
+  async resetOTP(@Body() resetDTO: ResetDto) {
+    await this.authService.recoverReset(resetDTO);
     return { message: 'If the email exists, a recovery link has been sent.' };
+  }
+
+  @Post('recovery/verify')
+  async verifyOTP(@Body() verifyDto: VerifyDto): Promise<AuthToken> {
+    return await this.authService.recoverVerify(verifyDto);
   }
 
   @Post('reset-password')

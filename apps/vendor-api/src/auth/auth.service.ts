@@ -4,11 +4,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from './dto/signup.dto';
 import { ResetDto, VerifyDto } from './dto/recovery.dto';
-
-interface AuthToken {
-  accessToken: string;
-  refreshToken: string;
-}
+import { AuthToken } from './dto/Auth';
 
 @Injectable()
 export class AuthService {
@@ -17,8 +13,8 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  generateOTP(min: number = 1, max: number = 100): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  generateOTP(): number {
+    return Math.floor(100000 + Math.random() * 900000);
   }
 
   async getToken(vendor: Vendor): Promise<AuthToken> {
@@ -103,11 +99,9 @@ export class AuthService {
     try {
       const payload = this.jwtService.verify(resetToken);
       const vendor = await this.vendorRepository.findByEmail(payload.email);
-
       if (!vendor) {
         throw new UnauthorizedException('Invalid reset token');
       }
-
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       await this.vendorRepository.update(vendor._id.toString(), {
         password: hashedPassword,
