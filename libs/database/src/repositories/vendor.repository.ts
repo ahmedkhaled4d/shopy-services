@@ -22,6 +22,13 @@ export class VendorRepository {
     return this.vendorModel.findById(id).exec();
   }
 
+  async findByOTP(code: number): Promise<Vendor | null> {
+    const now = new Date();
+    return this.vendorModel
+      .findOne({ 'otp.code': code, 'otp.expire': { $gt: now } })
+      .exec();
+  }
+
   async update(
     id: string,
     updateData: Partial<Vendor>,

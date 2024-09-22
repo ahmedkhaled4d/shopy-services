@@ -7,6 +7,7 @@ import { VendorRepository } from '@app/database';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private vendorRepository: VendorRepository) {
     super({
+      global: true,
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET || '',

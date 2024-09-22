@@ -29,8 +29,8 @@ export class Vendor {
   plan: string;
 
   @Prop({ type: Object, required: false })
-  tempToken?: {
-    token?: string;
+  otp?: {
+    code?: number;
     expire?: Date;
   };
 

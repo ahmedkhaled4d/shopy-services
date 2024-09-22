@@ -3,6 +3,12 @@ import * as bcrypt from 'bcrypt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from './dto/signup.dto';
+import { ResetDto, VerifyDto } from './dto/recovery.dto';
+
+interface AuthToken {
+  accessToken: string;
+  refreshToken: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -10,6 +16,27 @@ export class AuthService {
     private vendorRepository: VendorRepository,
     private jwtService: JwtService,
   ) {}
+
+  generateOTP(min: number = 1, max: number = 100): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  async getToken(vendor: Vendor): Promise<AuthToken> {
+    const payload = {
+      email: vendor.email,
+      name: vendor.name,
+      sub: vendor._id,
+    };
+    const accessToken = await this.jwtService.signAsync(payload);
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
+    });
+    await this.vendorRepository.update(vendor._id.toString(), {
+      refreshToken,
+    });
+
+    return { accessToken, refreshToken };
+  }
 
   async signUp(data: SignUpDto): Promise<Vendor> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -21,32 +48,19 @@ export class AuthService {
     });
   }
 
-  async signIn(
-    email: string,
-    password: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async signIn(email: string, password: string): Promise<AuthToken> {
     const vendor = await this.vendorRepository.findByEmail(email);
     if (!vendor) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Invalid Vendor');
     }
-
     const isPasswordValid = await bcrypt.compare(password, vendor.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
-
-    const payload = { email: vendor.email, sub: vendor._id };
-    const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION || '7d',
-    });
-
-    await this.vendorRepository.update(vendor._id.toString(), { refreshToken });
-
-    return { accessToken, refreshToken };
+    return this.getToken(vendor);
   }
 
-  async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
+  async refreshToken(refreshToken: string): Promise<AuthToken> {
     try {
       const payload = this.jwtService.verify(refreshToken);
       const vendor = await this.vendorRepository.findByEmail(payload.email);
@@ -54,28 +68,35 @@ export class AuthService {
       if (!vendor || vendor.refreshToken !== refreshToken) {
         throw new UnauthorizedException('Invalid refresh token');
       }
-
-      const newPayload = { email: vendor.email, sub: vendor._id };
-      const accessToken = this.jwtService.sign(newPayload);
-
-      return { accessToken };
+      return this.getToken(vendor);
     } catch (e) {
       throw new UnauthorizedException('Invalid refresh token', e);
     }
   }
 
-  async recoverPassword(email: string): Promise<void> {
-    const vendor = await this.vendorRepository.findByEmail(email);
+  async recoverReset(data: ResetDto): Promise<void> {
+    const vendor = await this.vendorRepository.findByEmail(data.email);
     if (!vendor) {
-      // Don't reveal that the email doesn't exist
-      return;
+      throw new UnauthorizedException('Invalid Email');
     }
+    const now = new Date();
+    const expire = new Date(now.getTime() + 60 * 60 * 1000); // Add 1 hour in milliseconds
 
     // Generate a password reset token
-    const resetToken = this.jwtService.sign({ email }, { expiresIn: '1h' });
+    const code = this.generateOTP();
+    await this.vendorRepository.update(String(vendor._id), {
+      otp: { code, expire },
+    });
+    // @TODO:: SEND EMAIL TO VENDOR WITH OTP
+    return;
+  }
 
-    // In a real application, you would send this token via email
-    console.log(`Password reset token for ${email}: ${resetToken}`);
+  async recoverVerify(data: VerifyDto): Promise<AuthToken> {
+    const vendor = await this.vendorRepository.findByOTP(data.code);
+    if (!vendor) {
+      throw new UnauthorizedException('Invalid OTP');
+    }
+    return this.getToken(vendor);
   }
 
   async resetPassword(resetToken: string, newPassword: string): Promise<void> {
