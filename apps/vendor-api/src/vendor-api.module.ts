@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { VendorApiController } from './vendor-api.controller';
 import { VendorApiService } from './vendor-api.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -13,6 +13,8 @@ import { MarketingModule } from './marketing/marketing.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { AccountModule } from './account/account.module';
+import { CommonModule } from '@app/common';
+import { LoggerMiddleware } from '@app/common/logger/logger.middleware';
 
 @Module({
   imports: [
@@ -26,6 +28,7 @@ import { AccountModule } from './account/account.module';
     }),
     AuthModule,
     DatabaseModule,
+    CommonModule,
     OrderModule,
     CatalogModule,
     DesignModule,
@@ -38,4 +41,8 @@ import { AccountModule } from './account/account.module';
   controllers: [VendorApiController],
   providers: [VendorApiService],
 })
-export class VendorApiModule {}
+export class VendorApiModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

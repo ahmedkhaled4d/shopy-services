@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
-import { CommonService } from './common.service';
+import { LoggerService } from './logger/logger.service';
+import { DatabaseModule } from '@app/database';
 
 @Module({
-  providers: [CommonService],
-  exports: [CommonService],
+  imports: [DatabaseModule],
+  providers: [LoggerService],
+  exports: [LoggerService],
 })
 export class CommonModule {}

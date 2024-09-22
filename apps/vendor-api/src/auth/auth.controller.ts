@@ -1,10 +1,17 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signup.dto';
 import { SignInDto } from './dto/signin.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { AuthToken } from './dto/Auth';
 import { ResetDto, VerifyDto } from './dto/recovery.dto';
+import { AuthGuard } from './auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -47,16 +54,22 @@ export class AuthController {
     return { message: 'Password has been reset successfully.' };
   }
 
-  @Get('google')
-  @UseGuards(AuthGuard('google'))
-  googleAuth() {
-    // This route will initiate the Google OAuth flow
+  @UseGuards(AuthGuard)
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
   }
 
-  @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req) {
-    // This route will handle the Google OAuth callback
-    return req.vendor;
-  }
+  // @Get('google')
+  // @UseGuards(AuthGuard('google'))
+  // googleAuth() {
+  //   // This route will initiate the Google OAuth flow
+  // }
+
+  // @Get('google/callback')
+  // @UseGuards(AuthGuard('google'))
+  // googleAuthRedirect(@Req() req) {
+  //   // This route will handle the Google OAuth callback
+  //   return req.vendor;
+  // }
 }
