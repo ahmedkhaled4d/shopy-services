@@ -1,41 +1,47 @@
-import { User, UserRepository } from '@app/database';
+import { Vendor, VendorRepository } from '@app/database';
 import * as bcrypt from 'bcrypt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { SignUpDto } from './dto/signup.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userRepository: UserRepository,
+    private vendorRepository: VendorRepository,
     private jwtService: JwtService,
   ) {}
 
-  async signUp(email: string, password: string): Promise<User> {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    return this.userRepository.create({ email, password: hashedPassword });
+  async signUp(data: SignUpDto): Promise<Vendor> {
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    return this.vendorRepository.create({
+      email: data.email,
+      phone: data.phone,
+      name: data.name,
+      password: hashedPassword,
+    });
   }
 
   async signIn(
     email: string,
     password: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) {
+    const vendor = await this.vendorRepository.findByEmail(email);
+    if (!vendor) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, vendor.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { email: user.email, sub: user._id };
+    const payload = { email: vendor.email, sub: vendor._id };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRATION || '7d',
     });
 
-    await this.userRepository.update(user._id.toString(), { refreshToken });
+    await this.vendorRepository.update(vendor._id.toString(), { refreshToken });
 
     return { accessToken, refreshToken };
   }
@@ -43,13 +49,13 @@ export class AuthService {
   async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
     try {
       const payload = this.jwtService.verify(refreshToken);
-      const user = await this.userRepository.findByEmail(payload.email);
+      const vendor = await this.vendorRepository.findByEmail(payload.email);
 
-      if (!user || user.refreshToken !== refreshToken) {
+      if (!vendor || vendor.refreshToken !== refreshToken) {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
-      const newPayload = { email: user.email, sub: user._id };
+      const newPayload = { email: vendor.email, sub: vendor._id };
       const accessToken = this.jwtService.sign(newPayload);
 
       return { accessToken };
@@ -59,8 +65,8 @@ export class AuthService {
   }
 
   async recoverPassword(email: string): Promise<void> {
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) {
+    const vendor = await this.vendorRepository.findByEmail(email);
+    if (!vendor) {
       // Don't reveal that the email doesn't exist
       return;
     }
@@ -75,14 +81,14 @@ export class AuthService {
   async resetPassword(resetToken: string, newPassword: string): Promise<void> {
     try {
       const payload = this.jwtService.verify(resetToken);
-      const user = await this.userRepository.findByEmail(payload.email);
+      const vendor = await this.vendorRepository.findByEmail(payload.email);
 
-      if (!user) {
+      if (!vendor) {
         throw new UnauthorizedException('Invalid reset token');
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await this.userRepository.update(user._id.toString(), {
+      await this.vendorRepository.update(vendor._id.toString(), {
         password: hashedPassword,
       });
     } catch (e) {

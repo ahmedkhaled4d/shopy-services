@@ -1,14 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-export type UserDocument = User & Document;
+export type VendorDocument = Vendor & Document;
 
 @Schema()
-export class User {
+export class Vendor {
   _id: Types.ObjectId;
 
   @Prop({ required: true, unique: true })
   email: string;
+
+  @Prop({ default: false })
+  isEmailVerified: boolean;
 
   @Prop({ required: true })
   password: string;
@@ -19,19 +22,19 @@ export class User {
   @Prop({ required: true })
   phone: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   timezone: string;
 
   @Prop({ default: 'basic' })
   plan: string;
 
-  @Prop()
+  @Prop({ type: Object, required: false })
   tempToken?: {
     token?: string;
     expire?: Date;
   };
 
-  @Prop({ default: { plan: 'basic' } })
+  @Prop({ type: Object, required: false, default: { name: '', logo: '' } })
   store?: {
     name?: string;
     logo?: string;
@@ -52,7 +55,11 @@ export class User {
     };
   };
 
-  @Prop({ default: { isShowLogo: false, isShowEmail: false } })
+  @Prop({
+    type: Object,
+    required: false,
+    default: { isShowLogo: false, isShowEmail: false },
+  })
   invoice?: {
     isShowLogo: boolean;
     isShowEmail: boolean;
@@ -64,4 +71,4 @@ export class User {
   refreshToken?: string;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+export const VendorSchema = SchemaFactory.createForClass(Vendor);

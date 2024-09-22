@@ -1,3 +1,3 @@
 export * from './database.module';
-export * from './schemas/user.schema';
-export * from './repositories/user.repository';
+export * from './schemas/vendor.schema';
+export * from './repositories/vendor.repository';

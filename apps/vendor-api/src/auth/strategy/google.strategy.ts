@@ -2,13 +2,13 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
-import { UserRepository } from '@app/database';
+import { VendorRepository } from '@app/database';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
     configService: ConfigService,
-    private userRepository: UserRepository,
+    private vendorRepository: VendorRepository,
   ) {
     super({
       clientID: configService.get<string>(process.env.GOOGLE_CLIENT_ID),
@@ -25,10 +25,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ): Promise<any> {
     // const { name, emails, photos } = profile;
-    const user = await this.userRepository.findByEmail(profile.emails);
-    if (!user) {
+    const vendor = await this.vendorRepository.findByEmail(profile.emails);
+    if (!vendor) {
       throw new UnauthorizedException();
     }
-    done(null, user);
+    done(null, vendor);
   }
 }

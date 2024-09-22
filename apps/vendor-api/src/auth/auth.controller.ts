@@ -10,7 +10,7 @@ export class AuthController {
 
   @Post('signup')
   async signUp(@Body() signUpDto: SignUpDto) {
-    return this.authService.signUp(signUpDto.email, signUpDto.password);
+    return this.authService.signUp(signUpDto);
   }
 
   @Post('signin')
@@ -50,6 +50,6 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   googleAuthRedirect(@Req() req) {
     // This route will handle the Google OAuth callback
-    return req.user;
+    return req.vendor;
   }
 }
