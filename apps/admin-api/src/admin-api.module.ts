@@ -10,9 +10,20 @@ import { LoggerModule } from './logger/logger.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { SupportModule } from './support/support.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: ['.env.local', '.env.production'],
+      isGlobal: true, // makes env variables available throughout the app
+    }),
+    MongooseModule.forRootAsync({
+      useFactory: async () => ({
+        uri: process.env.DATABASE_URI,
+      }),
+    }),
     VendorsModule,
     OrdersModule,
     CatalogModule,

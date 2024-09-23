@@ -11,6 +11,7 @@ import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: ['.env.local', '.env.production'],
       isGlobal: true, // makes env variables available throughout the app
     }),
     MongooseModule.forRootAsync({

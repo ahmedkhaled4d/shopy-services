@@ -6,7 +6,6 @@ async function bootstrap() {
   const app = await NestFactory.create(ClientApiModule);
   app.enableVersioning({ type: VersioningType.URI });
   app.useGlobalPipes(new ValidationPipe());
-
   await app.listen(3000);
 }
 bootstrap();

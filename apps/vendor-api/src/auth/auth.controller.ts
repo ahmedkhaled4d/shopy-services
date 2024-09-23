@@ -13,7 +13,7 @@ import { AuthToken } from './dto/Auth';
 import { ResetDto, VerifyDto } from './dto/recovery.dto';
 import { AuthGuard } from './auth.guard';
 
-@Controller('auth')
+@Controller({ path: 'auth', version: '1' })
 export class AuthController {
   constructor(private authService: AuthService) {}
 
