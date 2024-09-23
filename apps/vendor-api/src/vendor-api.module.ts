@@ -19,6 +19,7 @@ import { LoggerMiddleware } from '@app/common/logger/logger.middleware';
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: ['.env.local', '.env.production'],
       isGlobal: true, // makes env variables available throughout the app
     }),
     MongooseModule.forRootAsync({

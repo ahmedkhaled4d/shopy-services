@@ -1,16 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ClientApiController } from './client-api.controller';
 import { ClientApiService } from './client-api.service';
-import { OnboardingModule } from './onboarding/onboarding.module';
 import { WebsiteModule } from './website/website.module';
-import { CatalogModule } from './catalog/catalog.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { DatabaseModule } from '@app/database';
 import { ConfigModule } from '@nestjs/config';
+import { StoreModule } from './store/store.module';
+import { ToolsModule } from './tools/tools.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: ['.env.local', '.env.production'],
       isGlobal: true, // makes env variables available throughout the app
     }),
     MongooseModule.forRootAsync({
@@ -18,10 +19,10 @@ import { ConfigModule } from '@nestjs/config';
         uri: process.env.DATABASE_URI,
       }),
     }),
-    OnboardingModule,
     WebsiteModule,
-    CatalogModule,
     DatabaseModule,
+    StoreModule,
+    ToolsModule,
   ],
   controllers: [ClientApiController],
   providers: [ClientApiService],

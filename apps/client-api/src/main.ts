@@ -3,10 +3,9 @@ import { ClientApiModule } from './client-api.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(ClientApiModule);
+  const app = await NestFactory.create(ClientApiModule, { cors: true });
   app.enableVersioning({ type: VersioningType.URI });
   app.useGlobalPipes(new ValidationPipe());
-
   await app.listen(3000);
 }
 bootstrap();
